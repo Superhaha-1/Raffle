@@ -43,7 +43,6 @@ namespace Raffle
                 throw new Exception("不存在人员名单");
             }
             _people = new ObservableCollection<Person>(File.ReadAllLines(peoplePath).Select(name => new Person(name)));
-            Upset();
             string awardsPath = "Awards.txt";
             if (!File.Exists(awardsPath))
             {
@@ -78,10 +77,10 @@ namespace Raffle
                 {
                     _people.Remove(old);
                     old = null;
-                    Upset();
                 }
                 Random random = new Random((int)DateTime.Now.ToFileTime());
-                disposable = Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(10), RxApp.TaskpoolScheduler).Select(l => random.Next(_people.Count - 1)).Subscribe(index =>
+                People = new ObservableCollection<Person>(_people.OrderBy(person => random.Next(_people.Count - 1)));
+                disposable = Observable.Timer(TimeSpan.FromMilliseconds(0), TimeSpan.FromMilliseconds(100), RxApp.TaskpoolScheduler).Select(l => random.Next(_people.Count - 1)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(index =>
                 {
                     if (old != null)
                     {
@@ -92,6 +91,7 @@ namespace Raffle
                 });
                 return true;
             }, this.WhenAnyValue(t => t.SelectedAward.People.Count).CombineLatest(this.WhenAnyValue(t => t.SelectedAward), (count, award) => count < award.Count));
+            _isRunHelper = RunCommand.ToProperty(this, nameof(IsRun));
             ClearCommand = ReactiveCommand.Create(() =>
             {
                 foreach (var award in Awards)
@@ -102,7 +102,6 @@ namespace Raffle
                         _people.Add(person);
                     }
                     award.People.Clear();
-                    Upset();
                 }
                 File.WriteAllLines(awardsPath, Awards.Select(award => award.ToString()));
             });
@@ -152,6 +151,10 @@ namespace Raffle
 
         public Award SelectedAward => _selectedAwardHelper.Value;
 
+        private readonly ObservableAsPropertyHelper<bool> _isRunHelper;
+
+        public bool IsRun => _isRunHelper.Value;
+
         public string GifPath { get; } = "Run.gif";
 
         public ReactiveCommand<Unit, bool> RunCommand { get; }
@@ -161,11 +164,6 @@ namespace Raffle
         public ReactiveCommand<Unit, Unit> UpCommand { get; }
 
         public ReactiveCommand<Unit, Unit> DownCommand { get; }
-
-        private void Upset()
-        {
-            People = new ObservableCollection<Person>(_people.OrderBy(person => Guid.NewGuid()));
-        }
     }
 
     public sealed class Person : ReactiveObject

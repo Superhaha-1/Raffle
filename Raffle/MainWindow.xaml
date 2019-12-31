@@ -17,27 +17,29 @@
     </Window.InputBindings>
     <Window.Resources>
         <DataTemplate DataType="{x:Type local:Person}">
-            <Border BorderThickness="1"
-                            Name="Border_Name"
-                            BorderBrush="Black"
-                            Width="80">
+            <Border Name="Border_Name"
+                    BorderThickness="1"
+                    BorderBrush="{StaticResource MahApps.Brushes.Border.NonActive}"
+                    Background="{StaticResource MahApps.Brushes.Accent3}"
+                    Width="80">
                 <TextBlock Name="TextBlock_Name"
                            FontSize="18"
                            Margin="5"
                            HorizontalAlignment="Center"
                            Opacity="0"
+                           Foreground="{StaticResource MahApps.Brushes.White}"
                            Text="{Binding Name,Mode=OneTime}">
                     <TextBlock.Triggers>
                         <EventTrigger RoutedEvent="Loaded">
-                             <BeginStoryboard>
-                            <Storyboard>
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                  From="0"
                                                  To="1"
-                                                 Duration="0:0:3" 
+                                                 Duration="0:0:2" 
                                                  AutoReverse="False"/>
-                            </Storyboard>
-                        </BeginStoryboard>
+                                </Storyboard>
+                            </BeginStoryboard>
                         </EventTrigger>
                     </TextBlock.Triggers>
                 </TextBlock>
@@ -47,12 +49,12 @@
                              Value="True">
                     <Setter TargetName="Border_Name"
                             Property="Background"
-                            Value="Red"/>
+                            Value="{StaticResource MahApps.Brushes.Accent}"/>
                 </DataTrigger>
             </DataTemplate.Triggers>
         </DataTemplate>
     </Window.Resources>
-    <Grid>
+    <Grid Background="{StaticResource MahApps.Brushes.Accent4}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -67,24 +69,31 @@
                       Margin="5"
                       Focusable="False"
                       IsTabStop="False"
+                      Background="{StaticResource MahApps.Brushes.Accent}"
+                      Foreground="{StaticResource MahApps.Brushes.White}"
+                      Style="{StaticResource MahApps.Styles.ComboBox}"
                       ItemsSource="{Binding Awards,Mode=OneTime}"
                       SelectedIndex="{Binding SelectedAwardIndex,Mode=TwoWay}"/>
             <TextBlock FontSize="18"
                        VerticalAlignment="Center"
                        Focusable="False"
+                       Foreground="{StaticResource MahApps.Brushes.Accent}"
                        Text="{Binding SelectedAward.People.Count,Mode=OneWay}"/>
             <TextBlock Text="/"
                        FontSize="18"
                        Focusable="False"
+                       Foreground="{StaticResource MahApps.Brushes.Accent}"
                        VerticalAlignment="Center"/>
             <TextBlock VerticalAlignment="Center"
                        Focusable="False"
+                       Foreground="{StaticResource MahApps.Brushes.Accent}"
                        FontSize="18"
                        Text="{Binding SelectedAward.Count,Mode=OneWay}"/>
             <ToggleButton Focusable="False"
                           IsTabStop="False"
                           Margin="5"
-                          Command="{Binding RunCommand,Mode=OneTime}">
+                          Command="{Binding RunCommand,Mode=OneTime}"
+                          IsChecked="{Binding IsRun,Mode=OneWay}">
                 <ToggleButton.Style>
                     <Style TargetType="ToggleButton"
                            BasedOn="{StaticResource MahApps.Styles.ToggleButton.Circle}">
@@ -111,8 +120,8 @@
                 </ToggleButton.Style>
             </ToggleButton>
         </StackPanel>
-        <ItemsControl Grid.Row="1"
-                      Margin="5"
+        <ItemsControl Margin="5"
+                      Grid.Row="1"
                       HorizontalAlignment="Center"
                       Focusable="False"
                       IsTabStop="False"
@@ -147,8 +156,9 @@
                     <DataTemplate DataType="{x:Type local:Award}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="32"
-                                   Margin="10"
-                                   Text="{Binding Name,Mode=OneTime}"/>
+                                       Margin="10"
+                                       Foreground="{StaticResource MahApps.Brushes.Accent}"
+                                       Text="{Binding Name,Mode=OneTime}"/>
                             <ItemsControl Name="ItemsControl_Winners"
                                           Focusable="False"
                                           IsTabStop="False"
@@ -170,11 +180,12 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <Button Margin="5"
+            <Button Margin="10"
                     Grid.Column="1"
                     VerticalAlignment="Bottom"
                     Focusable="False"
                     IsTabStop="False"
+                    Style="{StaticResource MahApps.Styles.Button.AccentedSquare}"
                     Command="{Binding ClearCommand,Mode=OneTime}">
                 <Button.Content>
                     <iconPacks:PackIconMaterial Kind="MonitorClean"
