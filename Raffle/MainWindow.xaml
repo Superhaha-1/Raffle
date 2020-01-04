@@ -17,41 +17,40 @@
     </Window.InputBindings>
     <Window.Resources>
         <DataTemplate DataType="{x:Type local:Person}">
-            <Border Name="Border_Name"
-                    BorderThickness="1"
-                    BorderBrush="{StaticResource MahApps.Brushes.Border.NonActive}"
-                    Background="{StaticResource MahApps.Brushes.Accent3}"
-                    Width="80">
-                <TextBlock Name="TextBlock_Name"
-                           FontSize="18"
-                           Margin="5"
-                           HorizontalAlignment="Center"
-                           Opacity="0"
-                           Foreground="{StaticResource MahApps.Brushes.White}"
-                           Text="{Binding Name,Mode=OneTime}">
-                    <TextBlock.Triggers>
-                        <EventTrigger RoutedEvent="Loaded">
-                            <BeginStoryboard>
-                                <Storyboard>
-                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+            <Button Width="80"
+                    FontSize="18"
+                    Opacity="0"
+                    Focusable="False"
+                    IsTabStop="False"
+                    Content="{Binding Name,Mode=OneTime}"
+                    Command="{Binding Command, Mode=OneTime}"
+                    CommandParameter="{Binding Mode=OneTime}">
+                <Button.Triggers>
+                    <EventTrigger RoutedEvent="Loaded">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
                                                  From="0"
                                                  To="1"
                                                  Duration="0:0:2" 
                                                  AutoReverse="False"/>
-                                </Storyboard>
-                            </BeginStoryboard>
-                        </EventTrigger>
-                    </TextBlock.Triggers>
-                </TextBlock>
-            </Border>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding IsChecked,Mode=OneWay}"
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </Button.Triggers>
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource MahApps.Styles.Button.AccentedSquare}">
+                        <Setter Property="Background" Value="{StaticResource MahApps.Brushes.Accent3}"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked,Mode=OneWay}"
                              Value="True">
-                    <Setter TargetName="Border_Name"
-                            Property="Background"
+                                <Setter Property="Background"
                             Value="{StaticResource MahApps.Brushes.Accent}"/>
-                </DataTrigger>
-            </DataTemplate.Triggers>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </DataTemplate>
     </Window.Resources>
     <Grid Background="{StaticResource MahApps.Brushes.Accent4}">
@@ -59,7 +58,6 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
-            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Center">
@@ -89,14 +87,12 @@
                        Foreground="{StaticResource MahApps.Brushes.Accent}"
                        FontSize="18"
                        Text="{Binding SelectedAward.Count,Mode=OneWay}"/>
-            <ToggleButton Focusable="False"
-                          IsTabStop="False"
-                          Margin="5"
-                          Command="{Binding RunCommand,Mode=OneTime}"
-                          IsChecked="{Binding IsRun,Mode=OneWay}">
-                <ToggleButton.Style>
-                    <Style TargetType="ToggleButton"
-                           BasedOn="{StaticResource MahApps.Styles.ToggleButton.Circle}">
+            <Button x:Name="Button_Run" Margin="5"
+                          Command="{Binding RunCommand,Mode=OneTime}">
+                <Button.Style>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource MahApps.Styles.Button.Circle}">
+                        <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Accent}"/>
                         <Setter Property="Content">
                             <Setter.Value>
                                 <iconPacks:PackIconMaterial Kind="PlayCircle"
@@ -105,7 +101,10 @@
                             </Setter.Value>
                         </Setter>
                         <Style.Triggers>
-                            <Trigger Property="IsChecked"
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Foreground" Value="{StaticResource MahApps.Brushes.Accent4}"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsRun,Mode=OneWay}"
                                      Value="True">
                                 <Setter Property="Content">
                                     <Setter.Value>
@@ -114,11 +113,18 @@
                                                 Height="64"/>
                                     </Setter.Value>
                                 </Setter>
-                            </Trigger>
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </ToggleButton.Style>
-            </ToggleButton>
+                </Button.Style>
+            </Button>
+            <MediaElement Name="MediaElement_Run"
+                          Height="60"
+                          Width="60"
+                          VerticalAlignment="Center"
+                      Focusable="False"
+                      LoadedBehavior="{Binding GifBehavior,Mode=OneWay}"
+                      Source="{Binding GifPath,Mode=OneTime}"/>
         </StackPanel>
         <ItemsControl Margin="5"
                       Grid.Row="1"
@@ -132,21 +138,16 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
-        <MediaElement Name="MediaElement_Run"
-                      Grid.Row="2"
-                      Margin="5"
-                      Focusable="False"
-                      LoadedBehavior="Manual"
-                      Source="{Binding GifPath,Mode=OneTime}"/>
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ItemsControl Margin="5"
-                          Focusable="False"
-                          IsTabStop="False"
-                          ItemsSource="{Binding Awards,Mode=OneTime}">
+            <ListBox Name="ListBox_Awards" Focusable="False"
+                     IsTabStop="False"
+                         Margin="5"
+                          ItemsSource="{Binding Awards,Mode=OneTime}"
+                     SelectedIndex="{Binding SelectedAwardIndex,Mode=TwoWay}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel Orientation="Vertical"/>
@@ -157,7 +158,6 @@
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontSize="32"
                                        Margin="10"
-                                       Foreground="{StaticResource MahApps.Brushes.Accent}"
                                        Text="{Binding Name,Mode=OneTime}"/>
                             <ItemsControl Name="ItemsControl_Winners"
                                           Focusable="False"
@@ -168,6 +168,7 @@
                                 <ItemsControl.ItemContainerStyle>
                                     <Style TargetType="ContentPresenter">
                                         <Setter Property="Margin" Value="5"/>
+                                        <Setter Property="Focusable" Value="False"/>
                                     </Style>
                                 </ItemsControl.ItemContainerStyle>
                                 <ItemsControl.ItemsPanel>
@@ -179,7 +180,7 @@
                         </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            </ListBox>
             <Button Margin="10"
                     Grid.Column="1"
                     VerticalAlignment="Bottom"
