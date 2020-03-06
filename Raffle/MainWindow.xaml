@@ -11,14 +11,15 @@
                       Title="年会抽奖" Height="450" Width="800" WindowState="Maximized">
     <Window.InputBindings>
         <KeyBinding Command="{Binding RunCommand,Mode=OneTime}" Key="Space"/>
+        <KeyBinding Command="{Binding RunCommand,Mode=OneTime}" Key="PageDown"/>
         <KeyBinding Command="{Binding ClearCommand,Mode=OneTime}" Key="Delete"/>
-        <KeyBinding Command="{Binding UpCommand,Mode=OneTime}" Key="PageUp"/>
-        <KeyBinding Command="{Binding DownCommand,Mode=OneTime}" Key="PageDown"/>
+        <KeyBinding Command="{Binding UpCommand,Mode=OneTime}" Key="Up"/>
+        <KeyBinding Command="{Binding DownCommand,Mode=OneTime}" Key="Down"/>
     </Window.InputBindings>
     <Window.Resources>
         <DataTemplate DataType="{x:Type local:Person}">
-            <Button Width="80"
-                    FontSize="18"
+            <Button Width="100"
+                    FontSize="24"
                     Opacity="0"
                     Focusable="False"
                     IsTabStop="False"
@@ -87,7 +88,10 @@
                        Foreground="{StaticResource MahApps.Brushes.Accent}"
                        FontSize="18"
                        Text="{Binding SelectedAward.Count,Mode=OneWay}"/>
-            <Button x:Name="Button_Run" Margin="5"
+            <Button x:Name="Button_Run"
+                    Focusable="False"
+                    IsTabStop="False"
+                    Margin="5"
                           Command="{Binding RunCommand,Mode=OneTime}">
                 <Button.Style>
                     <Style TargetType="Button"
@@ -143,11 +147,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <ListBox Name="ListBox_Awards" Focusable="False"
+            <ScrollViewer Margin="5" Style="{StaticResource MahApps.Styles.ScrollViewer}" Focusable="False" IsTabStop="False" x:Name="ScrollViewer_Awards">
+            <ItemsControl Name="ListBox_Awards" Focusable="False"
                      IsTabStop="False"
-                         Margin="5"
-                          ItemsSource="{Binding Awards,Mode=OneTime}"
-                     SelectedIndex="{Binding SelectedAwardIndex,Mode=TwoWay}">
+                          ItemsSource="{Binding Awards,Mode=OneTime}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <VirtualizingStackPanel Orientation="Vertical"/>
@@ -155,10 +158,10 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type local:Award}">
-                        <StackPanel Orientation="Horizontal">
+                        <StackPanel x:Name="StackPanel_Main" Orientation="Horizontal" IsEnabled="False" IsEnabledChanged="StackPanel_Main_IsEnabledChanged">
                             <TextBlock FontSize="32"
-                                       Margin="10"
-                                       Text="{Binding Name,Mode=OneTime}"/>
+                                       Margin="5,20"
+                                       Text="{Binding Name,Mode=OneTime}" VerticalAlignment="Center"/>
                             <ItemsControl Name="ItemsControl_Winners"
                                           Focusable="False"
                                           IsTabStop="False"
@@ -178,9 +181,16 @@
                                 </ItemsControl.ItemsPanel>
                             </ItemsControl>
                         </StackPanel>
+                            <DataTemplate.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked,Mode=OneWay}" Value="True">
+                                    <Setter TargetName="StackPanel_Main" Property="Background" Value="{StaticResource  MahApps.Brushes.Accent}"/>
+                                    <Setter TargetName="StackPanel_Main" Property="IsEnabled" Value="True"/>
+                                </DataTrigger>
+                            </DataTemplate.Triggers>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
-            </ListBox>
+            </ItemsControl>
+            </ScrollViewer>
             <Button Margin="10"
                     Grid.Column="1"
                     VerticalAlignment="Bottom"

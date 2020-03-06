@@ -10,6 +10,7 @@ using System.Text;
 using System.Windows.Controls;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows;
 
 namespace Raffle
 {
@@ -21,16 +22,39 @@ namespace Raffle
         public MainWindow()
         {
             InitializeComponent();
-            var viewModel = new ViewModel();
-            DataContext = viewModel;
+            _viewModel = new ViewModel();
+            DataContext = _viewModel;
             MediaElement_Run.MediaEnded += (s, e) => MediaElement_Run.Position = TimeSpan.FromMilliseconds(1);
-            ListBox_Awards.SelectionChanged += (s, e) => ((ListBox)s).ScrollIntoView(e.AddedItems[0]);
-            Button_Run.Focus();
-            Button_Run.LostFocus += async (s, e) =>
+            //ListBox_Awards.SelectionChanged += (s, e) => ((ListBox)s).ScrollIntoView(e.AddedItems[0]);
+            //Button_Run.Focus();
+            //Button_Run.LostFocus += async (s, e) =>
+            //{
+            //    await Task.Delay(100);
+            //    Button_Run.Focus();
+            //};
+        }
+
+        private ViewModel _viewModel;
+
+        private void StackPanel_Main_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue)
             {
-                await Task.Delay(100);
-                Button_Run.Focus();
-            };
+                var stackPanel = (StackPanel)sender;
+                var award = (Award)stackPanel.DataContext;
+                var index = _viewModel.Awards.IndexOf(award);
+                double offset = ScrollViewer_Awards.VerticalOffset;
+                double newOffset = stackPanel.ActualHeight * index;
+                ScrollViewer_Awards.ScrollToVerticalOffset(newOffset);
+                //if (newOffset<=offset)
+                //{
+                //    ScrollViewer_Awards.ScrollToVerticalOffset(newOffset);
+                //}
+                //else
+                //{
+                //    ScrollViewer_Awards.ScrollToVerticalOffset(stackPanel.ActualHeight * (index + 1));
+                //}
+            }
         }
     }
 
@@ -90,6 +114,15 @@ namespace Raffle
             _selectedAwardIndex = 0;
             IDisposable? disposable = null;
             _selectedAwardHelper = this.WhenAnyValue(t => t.SelectedAwardIndex, index => Awards[index]).ToProperty(this, nameof(SelectedAward), Awards[0]);
+            this.WhenAnyValue(t => t.SelectedAward).Subscribe(award =>
+            {
+                if(_selectedAward !=null)
+                {
+                    _selectedAward.IsChecked = false;
+                }
+                award.IsChecked = true;
+                _selectedAward = award;
+            });
             RunCommand = ReactiveCommand.CreateFromTask(async () =>
             {
                 Random random = new Random((int)DateTime.Now.ToFileTime());
@@ -190,6 +223,8 @@ namespace Raffle
             }
         }
 
+        private Award? _selectedAward;
+
         private readonly ObservableAsPropertyHelper<Award> _selectedAwardHelper;
 
         public Award SelectedAward => _selectedAwardHelper.Value;
@@ -264,6 +299,21 @@ namespace Raffle
         private readonly ObservableAsPropertyHelper<bool> _isFilledHelper;
 
         public bool IsFilled => _isFilledHelper.Value;
+
+        private bool _isChecked;
+
+        public bool IsChecked
+        {
+            get
+            {
+                return _isChecked;
+            }
+
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isChecked, value);
+            }
+        }
 
         public override string ToString()
         {
